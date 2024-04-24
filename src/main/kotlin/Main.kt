@@ -1,7 +1,6 @@
-import command.CommandType
-import command.CreateExcelCommand
-import command.CreateExcelCommand2
-import command.HelpCommand
+import command.excel.create.CreateExcelCommand3
+import command.help.HelpCommand
+import command.utils.CommandType
 
 fun main(args: Array<String>) {
     start()
@@ -14,7 +13,7 @@ private fun start() {
     val readOutput = readResult.getOrNull(2).orEmpty()
     when (CommandType.findByValue(readCommand)) {
         CommandType.HELP -> HelpCommand()
-        CommandType.CREATE_EXCEL -> CreateExcelCommand2(readInput, readOutput)
+        CommandType.CREATE_EXCEL -> CreateExcelCommand3(readInput, readOutput)
         CommandType.CREATE_LOCALE -> HelpCommand()
         CommandType.UNKNOWN -> {
             println("Unknown command, run -help")

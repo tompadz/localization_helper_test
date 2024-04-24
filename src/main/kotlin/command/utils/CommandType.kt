@@ -1,4 +1,4 @@
-package command
+package command.utils
 
 enum class CommandType(val value: String) {
     HELP("-help"),

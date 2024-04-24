@@ -1,5 +1,6 @@
 package command
 
+import command.api.Command
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import rows.XmlLine

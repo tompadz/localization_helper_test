@@ -1,5 +1,6 @@
-package command
+package command.help
 
+import command.api.Command
 import java.lang.StringBuilder
 
 class HelpCommand: Command {
