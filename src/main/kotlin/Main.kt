@@ -1,4 +1,4 @@
-import command.excel.create.CreateExcelCommand3
+import command.excel.create.CreateExcelCommand
 import command.help.HelpCommand
 import command.utils.CommandType
 
@@ -13,7 +13,7 @@ private fun start() {
     val readOutput = readResult.getOrNull(2).orEmpty()
     when (CommandType.findByValue(readCommand)) {
         CommandType.HELP -> HelpCommand()
-        CommandType.CREATE_EXCEL -> CreateExcelCommand3(readInput, readOutput)
+        CommandType.CREATE_EXCEL -> CreateExcelCommand(readInput, readOutput)
         CommandType.CREATE_LOCALE -> HelpCommand()
         CommandType.UNKNOWN -> {
             println("Unknown command, run -help")

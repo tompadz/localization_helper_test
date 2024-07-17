@@ -4,6 +4,11 @@ import locale.Locale
 import java.io.File
 
 interface LocaleParser {
-    fun fromFile(file: File): Map<String, Locale>
-    fun fromProjectDir(file: File): Set<Map<String, Locale>>
+
+    companion object {
+        const val LOCALE_DEFAULT = "Default"
+    }
+
+    fun fromFile(file: File): Locale
+    fun fromProjectDir(file: File): List<Locale>
 }

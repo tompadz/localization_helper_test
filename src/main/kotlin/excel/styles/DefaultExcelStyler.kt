@@ -2,19 +2,40 @@ package excel.styles
 
 import excel.styles.api.ExcelStyler
 import org.apache.poi.ss.usermodel.*
+import org.apache.poi.xssf.usermodel.XSSFColor
+import java.awt.Color
+
 
 class DefaultExcelStyler : ExcelStyler {
+
+    companion object {
+        private val COLOR_RED = ExcelColor(254, 194, 194)
+        private val COLOR_BLUE = ExcelColor(47, 117, 181)
+    }
 
     private fun Workbook.createBaseCellStyle(
         cellScope: (CellStyle.() -> Unit) = {}
     ): CellStyle = this.createCellStyle()
         .apply {
             wrapText = true
+            borderTop = BorderStyle.THIN
+            borderLeft = BorderStyle.THIN
+            borderRight = BorderStyle.THIN
+            borderBottom = BorderStyle.THIN
         }
         .apply(cellScope)
 
+
+    override fun getHeaderCellStyle(sheet: Sheet): CellStyle {
+        return sheet.workbook.createBaseCellStyle {
+            alignment = HorizontalAlignment.CENTER
+            verticalAlignment = VerticalAlignment.CENTER
+            locked = true
+        }
+    }
+
     override fun getUntranslatableCellStyle(sheet: Sheet): CellStyle {
-        return sheet.workbook.createCellStyle().apply {
+        return sheet.workbook.createBaseCellStyle {
             fillForegroundColor = IndexedColors.GREY_25_PERCENT.getIndex()
             fillPattern = FillPatternType.SOLID_FOREGROUND
         }
@@ -26,7 +47,7 @@ class DefaultExcelStyler : ExcelStyler {
 
     override fun getNotTranslatedCellStyle(sheet: Sheet): CellStyle {
         return sheet.workbook.createBaseCellStyle {
-            fillForegroundColor = IndexedColors.RED.getIndex()
+            setFillForegroundColor(getColor(COLOR_RED))
             fillPattern = FillPatternType.SOLID_FOREGROUND
         }
     }
@@ -41,11 +62,11 @@ class DefaultExcelStyler : ExcelStyler {
     override fun getCellTextWithStyle(sheet: Sheet, text: String): RichTextString {
         val richText = sheet.workbook.creationHelper.createRichTextString(text)
         val specialFont = sheet.workbook.createFont().apply {
-            color = IndexedColors.DARK_YELLOW.index
+            color = IndexedColors.BLUE.index
         }
 
         val specialCharacters = listOf(
-            "\n", "%s", "%d", "%f", "&", "\t", "<", ">", "\"", "'"
+            "\\n", "%s", "%d", "%f", "&", "\\t", "<", ">"
         )
 
         val htmlTagPattern = "<[^>]+>".toRegex()
@@ -73,5 +94,18 @@ class DefaultExcelStyler : ExcelStyler {
         }
 
         return richText
+    }
+
+    private fun getColor(color: ExcelColor): XSSFColor {
+        val rgb = byteArrayOf(color.r.toByte(), color.g.toByte(), color.b.toByte())
+        return XSSFColor(rgb, null)
+    }
+
+    private data class ExcelColor(
+        val r: Int,
+        val g: Int,
+        val b: Int
+    ) {
+        fun toJavaColor() = Color(r, g, b)
     }
 }

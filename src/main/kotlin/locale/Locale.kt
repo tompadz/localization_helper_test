@@ -1,17 +1,11 @@
 package locale
 
-sealed class Locale(
-    open val key: kotlin.String,
+
+data class Locale(
+    val path: String,
+    val locale: String,
+    val isDefault: Boolean,
+    val localeNodes: List<LocaleNode>
 ) {
-
-    data class Comment(
-        override val key: kotlin.String,
-        val value: kotlin.String,
-    ) : Locale(key)
-
-    data class String(
-        override val key: kotlin.String,
-        val value: kotlin.String,
-        val translatable: Boolean,
-    ) : Locale(key)
+    val pathHash = path.hashCode()
 }
