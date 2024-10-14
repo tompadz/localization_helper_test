@@ -3,6 +3,8 @@ package utils
 import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
+import java.io.File
+import java.io.FileWriter
 import java.io.StringWriter
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerConfigurationException
@@ -32,6 +34,18 @@ fun Node.asString(onlyContent: Boolean = true): String {
     } else {
         xmlNodeString
     }
+}
+
+fun Document.writeToFile(file: File): File {
+    val transformerFactory = TransformerFactory.newInstance()
+    val transformer = transformerFactory.newTransformer().apply {
+        setOutputProperty(OutputKeys.INDENT, "yes")
+    }
+    val source = DOMSource(this)
+    val writer = FileWriter(file)
+    val result = StreamResult(writer)
+    transformer.transform(source, result)
+    return file
 }
 
 fun NodeList.find(result: (Node) -> Boolean): Node? {

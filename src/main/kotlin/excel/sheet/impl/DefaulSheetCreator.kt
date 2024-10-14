@@ -36,8 +36,10 @@ class DefaultSheetCreator: SheetCreator {
             val name = sheet.sheetName
             val locales = mutableListOf<Locale>()
             val languageRow = sheet.getRow(0)
-            languageRow.forEach { cell ->
-                locales.add(Locale.createFromLanguage(cell.stringCellValue))
+            languageRow.forEachIndexed { index, cell ->
+                if (index != 0) {
+                    locales.add(Locale.createFromLanguage(cell.stringCellValue))
+                }
             }
             for (row in sheet) {
                 if (row == languageRow) continue

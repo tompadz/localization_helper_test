@@ -20,13 +20,12 @@ class AndroidCommentsHelper {
     }
 
     fun refactorAndroidCommentToXml(xmlFile: File): File {
-        val regex = Regex("<!--([\\s\\S]*?)-->")
         val document = documentBuilderFactory.newDocumentBuilder().newDocument()
         val tempFileName = "locale+${xmlFile.path}+${Date().time}"
         val tempFile = File.createTempFile(tempFileName, ".xml")
         Files.copy(xmlFile.toPath(), FileOutputStream(tempFile))
         val linesWithCommentsReplaced = tempFile.readLines(StandardCharsets.UTF_8).map { line ->
-            val commentMatcher = regex.find(line)
+            val commentMatcher = findAndroidComment(line)
             if (commentMatcher != null) {
                 val commentElement = document.createElement(ELEMENT_COMMENT).apply {
                     setAttribute(ATTRIBUTE_NAME, UUID.randomUUID().toString())
@@ -39,6 +38,15 @@ class AndroidCommentsHelper {
         }
         Files.write(tempFile.toPath(), linesWithCommentsReplaced, StandardCharsets.UTF_8)
         return tempFile
+    }
+
+    fun findAndroidComment(string: String): MatchResult? {
+        val regex = Regex("<!--([\\s\\S]*?)-->")
+        return regex.find(string)
+    }
+
+    fun isAndroidComment(string: String): Boolean {
+        return findAndroidComment(string) != null
     }
 
     fun refactorXmlCommentToAndroid(xmlFile: File): File {

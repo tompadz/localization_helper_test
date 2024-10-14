@@ -21,6 +21,7 @@ class DefaultExcelCreator: ExcelCreator {
 
     override fun createLocaleExcelFile(
         outputDir: String,
+        excelFileName: String,
         sheets: List<LocaleSheet>,
         styler: ExcelStyler
     ): File {
@@ -31,7 +32,7 @@ class DefaultExcelCreator: ExcelCreator {
             val sheetLocales = sheets.find { it.name == sheet.sheetName }?.locales ?: throw Exception("unknown sheet")
             fillExcelSheet(sheet, sheetLocales)
         }
-        val file = Path("$outputDir\\locale.xlsx").createFile()
+        val file = Path("$outputDir\\$excelFileName.xlsx").createFile()
         workbook.write(file.outputStream())
         workbook.close()
         return file.toFile()

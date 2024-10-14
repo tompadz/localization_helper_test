@@ -9,6 +9,7 @@ interface ExcelCreator {
 
     fun createLocaleExcelFile(
         outputDir: String,
+        excelFileName: String,
         sheets: List<LocaleSheet>,
         styler: ExcelStyler
     ): File
