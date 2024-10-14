@@ -1,9 +1,9 @@
-package parser.api
+package xml.parser.locale
 
 import locale.Locale
 import java.io.File
 
-interface LocaleParser {
+interface XmlToLocaleParser {
 
     companion object {
         const val LOCALE_DEFAULT = "Default"
@@ -11,4 +11,5 @@ interface LocaleParser {
 
     fun fromFile(file: File): Locale
     fun fromProjectDir(file: File): List<Locale>
+
 }

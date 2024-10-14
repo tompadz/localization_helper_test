@@ -1,21 +1,20 @@
-package parser.impl
+package xml.parser.locale
 
 import locale.Locale
 import locale.LocaleNode
 import org.w3c.dom.Element
 import org.w3c.dom.Node.ELEMENT_NODE
-import parser.api.LocaleParser
-import parser.api.LocaleParser.Companion.LOCALE_DEFAULT
+import utils.AndroidCommentsHelper
+import utils.AndroidStringFileFinder
+import utils.asString
+import xml.parser.locale.XmlToLocaleParser.Companion.LOCALE_DEFAULT
 import java.io.File
-import java.io.FileOutputStream
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.util.*
 import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
 
 
-class AndroidXmlParser : LocaleParser {
+
+class AndroidXmlToLocaleParser : XmlToLocaleParser {
 
     companion object {
         private const val ELEMENT_STRING = "string"
@@ -29,7 +28,7 @@ class AndroidXmlParser : LocaleParser {
     }
 
     override fun fromFile(file: File): Locale {
-        val fileWithComments = insertCommentsToXml(file)
+        val fileWithComments = AndroidCommentsHelper().refactorAndroidCommentToXml(file)
         val document = parseXmlDocument(fileWithComments)
         val nodes = extractLocales(document)
         val locale = file.path.split("\\").run {
@@ -39,41 +38,20 @@ class AndroidXmlParser : LocaleParser {
             unsafeLocale.ifBlank { LOCALE_DEFAULT }
         }
         return Locale(
-            localeNodes = nodes,
             path = file.path,
-            locale = locale,
+            language = locale,
             isDefault = locale == LOCALE_DEFAULT
-        )
+        ).apply {
+            addNodes(nodes)
+        }
     }
 
     override fun fromProjectDir(file: File): List<Locale> {
         if (!file.exists() || !file.isDirectory) {
             throw IllegalArgumentException("Source directory does not exist or is not a directory.")
         }
-        val stringFiles = getStringFilesFromDir(file)
-        return stringFiles.map { fromFile(it) }.sortedByDescending { it.locale == LOCALE_DEFAULT }
-    }
-
-    private fun insertCommentsToXml(xmlFile: File): File {
-        val regex = Regex("<!--([\\s\\S]*?)-->")
-        val document = documentBuilderFactory.newDocumentBuilder().newDocument()
-        val tempFileName = "locale+${xmlFile.path}+${Date().time}"
-        val tempFile = File.createTempFile(tempFileName, ".xml")
-        Files.copy(xmlFile.toPath(), FileOutputStream(tempFile))
-        val linesWithCommentsReplaced = tempFile.readLines(StandardCharsets.UTF_8).map { line ->
-            val commentMatcher = regex.find(line)
-            if (commentMatcher != null) {
-                val commentElement = document.createElement(ELEMENT_COMMENT).apply {
-                    setAttribute(ATTRIBUTE_NAME, UUID.randomUUID().toString())
-                    textContent = commentMatcher.groupValues[1]
-                }
-                "<$ELEMENT_COMMENT $ATTRIBUTE_NAME=\"${commentElement.getAttribute(ATTRIBUTE_NAME)}\">${commentElement.textContent}</$ELEMENT_COMMENT>"
-            } else {
-                line
-            }
-        }
-        Files.write(tempFile.toPath(), linesWithCommentsReplaced, StandardCharsets.UTF_8)
-        return tempFile
+        val stringFiles = AndroidStringFileFinder().find(file)
+        return stringFiles.map { fromFile(it) }.sortedByDescending { it.language == LOCALE_DEFAULT }
     }
 
     private fun parseXmlDocument(file: File): org.w3c.dom.Document {
@@ -104,7 +82,7 @@ class AndroidXmlParser : LocaleParser {
                 val translatable = element.getAttribute(ATTRIBUTE_TRANSLATABLE).toBooleanStrictOrNull() ?: true
                 //todo remove if need show untranslatable items
                 if (!translatable) return null
-                val value = element.textContent
+                val value = element.asString()
                 LocaleNode.String(key, value, translatable)
             }
             ELEMENT_COMMENT -> {
@@ -114,20 +92,5 @@ class AndroidXmlParser : LocaleParser {
             }
             else -> null
         }
-    }
-
-    private fun getStringFilesFromDir(dir: File): List<File> {
-        val files = mutableListOf<File>()
-        dir.listFiles()?.forEach { file ->
-            if (file.isDirectory) {
-                val stringFiles = getStringFilesFromDir(file)
-                files.addAll(stringFiles)
-            } else {
-                if (file.name.contains("strings.xml")) {
-                    files.add(file)
-                }
-            }
-        }
-        return files
     }
 }

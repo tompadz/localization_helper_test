@@ -63,7 +63,7 @@ class DefaultExcelCreator: ExcelCreator {
             }
             locales.forEachIndexed { index, locale ->
                 createCell(index + 1).apply {  //+1 because cell 0 will be created before
-                    setCellValue(locale.locale)
+                    setCellValue(locale.language)
                     cellStyle = styler.getHeaderCellStyle(sheet)
                 }
             }
@@ -71,9 +71,9 @@ class DefaultExcelCreator: ExcelCreator {
     }
 
     private fun fillKeysCell(sheet: Sheet, defaultLocale: Locale) {
-        val rowCount = defaultLocale.localeNodes.size
+        val rowCount = defaultLocale.nodes.size
         for (i in 0 until rowCount) {
-            val node = defaultLocale.localeNodes[i]
+            val node = defaultLocale.nodes[i]
             sheet.createRow(i + 1).apply {
                 createCell(0).apply {
                     when (node) {
@@ -96,10 +96,10 @@ class DefaultExcelCreator: ExcelCreator {
     }
 
     private fun fillLocaleValues(sheet: Sheet, locales: List<Locale>, defaultLocale: Locale) {
-        defaultLocale.localeNodes.forEachIndexed { i, defaultNode ->
+        defaultLocale.nodes.forEachIndexed { i, defaultNode ->
             val row = sheet.getOrCreateRow(i + 1)
             locales.forEachIndexed { j, locale ->
-                val node = locale.localeNodes.find { it.key == defaultNode.key }
+                val node = locale.nodes.find { it.key == defaultNode.key }
                 row.createCell(j + 1).apply {
                     styleLocaleNode(defaultNode, node, this)
                 }
